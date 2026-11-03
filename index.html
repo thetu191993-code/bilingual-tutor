@@ -76,7 +76,7 @@
         const resultBox = document.getElementById('resultBox');
         const aiOutput = document.getElementById('aiOutput');
 
-        checkBtn.addEventListener('click', async () => {
+        checkBtn.addEventListener('click', () => {
             const text = userInput.value.trim();
             if (!text) {
                 alert('Vui lòng nhập văn bản trước khi phân tích!');
@@ -88,38 +88,52 @@
             checkBtn.disabled = true;
             checkBtn.classList.add('opacity-70', 'cursor-not-allowed');
 
-            try {
-                // SỬA ĐỔI TẠI ĐÂY: Chuyển sang phương thức GET
-                // Mã hóa đoạn văn bản và gắn vào cuối URL
-                const fetchUrl = `${GAS_WEB_APP_URL}?message=${encodeURIComponent(text)}`;
-                
-                const response = await fetch(fetchUrl, {
-                    method: 'GET'
-                });
-                
-                const data = await response.json();
-                const resultText = data.result || data.error;
+            // Tạo tên hàm callback ngẫu nhiên để không bị trùng lặp
+            const callbackName = 'jsonpCallback_' + Math.round(100000 * Math.random());
 
+            // Định nghĩa hàm callback sẽ được gọi khi Apps Script trả kết quả về
+            window[callbackName] = async function(data) {
+                const resultText = data.result || data.error;
+                
                 aiOutput.innerText = resultText;
                 resultBox.classList.remove('hidden');
                 
-                // Lưu trữ vào Firebase Realtime Database (Nút 'tutor_history')
-                const historyRef = ref(db, 'tutor_history');
-                await push(historyRef, {
-                    original_text: text,
-                    corrected_text: resultText,
-                    timestamp: serverTimestamp()
-                });
-                
-            } catch (error) {
-                console.error("Lỗi kết nối:", error);
-                alert('Có lỗi xảy ra trong quá trình xử lý hoặc kết nối máy chủ.');
-            } finally {
-                // Khôi phục giao diện
                 loading.classList.add('hidden');
                 checkBtn.disabled = false;
                 checkBtn.classList.remove('opacity-70', 'cursor-not-allowed');
-            }
+
+                try {
+                    const historyRef = ref(db, 'tutor_history');
+                    await push(historyRef, {
+                        original_text: text,
+                        corrected_text: resultText,
+                        timestamp: serverTimestamp()
+                    });
+                } catch (dbError) {
+                    console.error("Lỗi lưu Firebase:", dbError);
+                }
+
+                // Dọn dẹp thẻ script và hàm sau khi chạy xong
+                delete window[callbackName];
+                document.body.removeChild(script);
+            };
+
+            // Tiêm thẻ script động để vượt mặt CORS hoàn toàn
+            const script = document.createElement('script');
+            // Cập nhật lại biến GAS_WEB_APP_URL nếu bạn có URL mới sau khi deploy
+            script.src = `${GAS_WEB_APP_URL}?message=${encodeURIComponent(text)}&callback=${callbackName}`;
+            
+            // Xử lý trường hợp lỗi mạng
+            script.onerror = function() {
+                alert('Có lỗi mạng xảy ra khi kết nối máy chủ.');
+                loading.classList.add('hidden');
+                checkBtn.disabled = false;
+                checkBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+                delete window[callbackName];
+                document.body.removeChild(script);
+            };
+
+            document.body.appendChild(script);
         });
     </script>
 </body>
