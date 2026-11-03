@@ -3,59 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bilingual Tutor & Editor</title>
+    <title>Bilingual Tutor & Editor | Trợ Lý Song Ngữ Chuyên Nghiệp</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Thư viện hiển thị Markdown chuyên nghiệp -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Tùy chỉnh định dạng kết quả Markdown từ AI */
+        .markdown-body h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #1e40af;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.25rem;
+            border-bottom: 1px solid #dbeafe;
+        }
+        .markdown-body h3:first-child { margin-top: 0; }
+        .markdown-body p { margin-bottom: 0.75rem; line-height: 1.6; }
+        .markdown-body ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+        .markdown-body li { margin-bottom: 0.35rem; line-height: 1.5; }
+        .markdown-body strong { color: #0f172a; font-weight: 600; }
+        .markdown-body code {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            padding: 0.15rem 0.35rem;
+            border-radius: 0.25rem;
+            font-size: 0.9em;
+        }
+        .markdown-body blockquote {
+            border-left: 4px solid #3b82f6;
+            background-color: #eff6ff;
+            padding: 0.75rem 1rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin: 0.75rem 0;
+            font-weight: 500;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
+<body class="bg-slate-100 min-h-screen text-slate-800 py-8 px-4">
 
-    <div class="w-full max-w-4xl bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200">
-        <!-- Header -->
-        <div class="bg-blue-700 text-white p-6">
-            <h1 class="text-3xl font-bold">Bilingual Tutor & Editor</h1>
-            <p class="text-blue-100 mt-2">Hệ thống sửa lỗi chính tả tiếng Việt & ngữ pháp tiếng Anh tự động</p>
+    <div class="max-w-5xl mx-auto space-y-6">
+        <!-- Main Card -->
+        <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-slate-200/80">
+            
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-900 text-white p-6 sm:p-8">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <div class="inline-flex items-center space-x-2 bg-blue-600/40 border border-blue-400/30 rounded-full px-3 py-1 text-xs font-medium text-blue-100 mb-3">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span>AI Powered • Tốc độ cao</span>
+                        </div>
+                        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Bilingual Tutor & Editor</h1>
+                        <p class="text-blue-100/90 mt-1 text-sm sm:text-base">Hệ thống kiểm tra ngữ pháp tiếng Anh, chính tả tiếng Việt & biên tập đa ngôn ngữ</p>
+                    </div>
+                    <div id="perfBadge" class="hidden self-start sm:self-center bg-white/10 backdrop-blur-sm border border-white/15 rounded-xl px-4 py-2 text-xs text-blue-100">
+                        <div>Mô hình: <span id="modelLabel" class="font-semibold text-white">Auto</span></div>
+                        <div>Tốc độ: <span id="timeLabel" class="font-semibold text-emerald-300">0.0s</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workspace Content -->
+            <div class="p-6 sm:p-8 space-y-5">
+                
+                <!-- Thanh công cụ chọn chế độ & câu mẫu -->
+                <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Chế độ biên tập:</span>
+                        <select id="modeSelect" class="text-sm bg-slate-50 border border-slate-300 text-slate-700 rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="academic">Học thuật & Chuẩn mực (Academic)</option>
+                            <option value="business">Email Công việc / EHS (Business)</option>
+                            <option value="natural">Giao tiếp Tự nhiên (Natural)</option>
+                        </select>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <span class="text-xs text-slate-400 mr-1">Thử nhanh:</span>
+                        <button type="button" class="sample-btn text-xs bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 px-2.5 py-1 rounded-md transition" data-text="Kiểm tra lại thông tin tiếng anh ghi sao?">Hỏi từ vựng</button>
+                        <button type="button" class="sample-btn text-xs bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 px-2.5 py-1 rounded-md transition" data-text="Please check the informations and send report to me yesterday.">Sửa câu tiếng Anh</button>
+                        <button type="button" class="sample-btn text-xs bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 px-2.5 py-1 rounded-md transition" data-text="Chúng tôi đang tiến hành rà soát quy trình an toàn lao động tại nhà máy.">Dịch sang tiếng Anh</button>
+                    </div>
+                </div>
+
+                <!-- Vùng nhập văn bản -->
+                <div class="relative">
+                    <div class="flex justify-between items-center mb-2">
+                        <label for="userInput" class="block text-sm font-semibold text-slate-700">Nội dung cần phân tích hoặc chỉnh sửa:</label>
+                        <div class="flex items-center space-x-3">
+                            <span id="charCount" class="text-xs text-slate-400">0 ký tự</span>
+                            <button id="clearBtn" type="button" class="text-xs text-slate-400 hover:text-red-500 font-medium transition">Xóa trắng</button>
+                        </div>
+                    </div>
+                    <textarea id="userInput" rows="5" 
+                        class="w-full p-4 bg-slate-50/50 border border-slate-300 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-100 focus:border-blue-600 transition outline-none resize-y text-slate-800 placeholder-slate-400 leading-relaxed" 
+                        placeholder="Nhập câu tiếng Việt, đoạn văn tiếng Anh hoặc câu hỏi ngữ pháp vào đây... (Nhấn Ctrl + Enter để phân tích nhanh)"></textarea>
+                </div>
+                
+                <!-- Nút hành động -->
+                <button id="checkBtn" 
+                    class="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-3.5 px-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex justify-center items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span>Phân tích & Chỉnh sửa ngay</span>
+                </button>
+
+                <!-- Trạng thái đang xử lý -->
+                <div id="loading" class="hidden py-8 flex flex-col justify-center items-center space-y-3 bg-slate-50 rounded-xl border border-slate-200/60">
+                    <div class="flex items-center space-x-3 text-blue-600">
+                        <svg class="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span class="font-semibold text-base">Chuyên gia AI đang phân tích ngữ cảnh & cấu trúc...</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Thời gian phản hồi thông thường: 1.5 - 3 giây</p>
+                </div>
+                
+                <!-- Khung hiển thị lỗi (nếu có) -->
+                <div id="errorBox" class="hidden p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl text-red-700 text-sm">
+                    <div class="font-bold mb-1">Thông báo hệ thống:</div>
+                    <div id="errorText"></div>
+                </div>
+
+                <!-- Khung hiển thị kết quả chuyên nghiệp -->
+                <div id="resultBox" class="hidden bg-emerald-50/40 border border-emerald-200 rounded-2xl overflow-hidden shadow-sm">
+                    <div class="bg-emerald-100/60 px-5 py-3 border-b border-emerald-200 flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+                            <h2 class="font-bold text-emerald-950 text-sm sm:text-base">Kết quả Phân tích & Biên tập</h2>
+                        </div>
+                        <button id="copyBtn" type="button" class="inline-flex items-center space-x-1.5 text-xs font-semibold bg-white hover:bg-emerald-600 text-emerald-800 hover:text-white px-3 py-1.5 rounded-lg border border-emerald-300 transition shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                            <span id="copyBtnText">Sao chép kết quả</span>
+                        </button>
+                    </div>
+                    <div id="aiOutput" class="p-6 markdown-body text-slate-800 text-sm sm:text-base"></div>
+                </div>
+
+            </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="p-6">
-            <label for="userInput" class="block text-sm font-semibold text-gray-700 mb-2">Văn bản cần kiểm tra:</label>
-            <textarea id="userInput" rows="6" 
-                class="w-full p-4 border border-gray-300 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition outline-none resize-none text-gray-800" 
-                placeholder="Nhập hoặc dán văn bản của bạn vào đây..."></textarea>
-            
-            <button id="checkBtn" 
-                class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-300 flex justify-center items-center">
-                <span>Phân tích & Chỉnh sửa</span>
-            </button>
-
-            <!-- Loading State -->
-            <div id="loading" class="hidden mt-6 flex justify-center items-center space-x-2 text-blue-600">
-                <svg class="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span class="font-medium">Hệ thống AI đang xử lý...</span>
+        <!-- Khung Lịch sử Tra cứu gần đây (Đồng bộ Firebase) -->
+        <div class="bg-white shadow-md rounded-2xl border border-slate-200/80 p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="font-bold text-slate-800 text-base">Lịch sử phân tích gần đây</h3>
+                    <p class="text-xs text-slate-400">Tự động lưu trữ & đồng bộ qua Firebase Realtime Database</p>
+                </div>
+                <span id="dbStatus" class="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 font-medium">Đang kết nối dữ liệu...</span>
             </div>
-            
-            <!-- Result Box -->
-            <div id="resultBox" class="hidden mt-6 bg-green-50 border-l-4 border-green-500 p-5 rounded-r-lg shadow-inner">
-                <h2 class="font-bold text-green-800 mb-3 text-lg">Kết quả từ Trợ lý:</h2>
-                <div id="aiOutput" class="text-gray-800 whitespace-pre-wrap leading-relaxed"></div>
+            <div id="historyList" class="space-y-3 text-sm text-slate-600">
+                <p class="text-slate-400 italic text-xs">Chưa có bản ghi nào trong phiên làm việc này.</p>
             </div>
         </div>
     </div>
 
-    <!-- Script kết hợp Apps Script và Firebase Realtime Database -->
+    <!-- Script kết hợp Apps Script JSONP và Firebase Realtime Database -->
     <script type="module">
-        // 1. Khởi tạo Firebase SDK v10
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, push, serverTimestamp, query, limitToLast, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Thay thế bằng cấu hình Firebase của bạn
+        // 1. Cấu hình Firebase chuẩn xác (Đã tích hợp databaseURL Singapore)
         const firebaseConfig = {
             apiKey: "AIzaSyCuZ1mWP9HucJ7KmPXDcBOU84pSa5d-iQU",
             authDomain: "register-app-e6411.firebaseapp.com",
-            databaseURL: "https://register-app-e6411-default-rtdb.asia-southeast1.firebasedatabase.app", 
+            databaseURL: "https://register-app-e6411-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "register-app-e6411",
             storageBucket: "register-app-e6411.firebasestorage.app",
             messagingSenderId: "156977082805",
@@ -66,75 +186,184 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // 2. URL của Google Apps Script Web App
-        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbygvdeymnL6CQQb5lJNouqS9luJ4vp05mdVvRE-FqHGADQmV4RU89YUuDevBXi9IQ5PQg/exec';
+        // 2. Đường dẫn Google Apps Script Web App
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzdjgPnmUHQKaVPf3lb22a-qkbdrahE3_N4ubCkmYzRoDxGPaCBHBg_o2SS_lDlUJTGQA/exec';
         
-        // 3. Xử lý sự kiện UI
+        // 3. Các phần tử giao diện
         const checkBtn = document.getElementById('checkBtn');
         const userInput = document.getElementById('userInput');
+        const modeSelect = document.getElementById('modeSelect');
+        const clearBtn = document.getElementById('clearBtn');
+        const charCount = document.getElementById('charCount');
         const loading = document.getElementById('loading');
         const resultBox = document.getElementById('resultBox');
+        const errorBox = document.getElementById('errorBox');
+        const errorText = document.getElementById('errorText');
         const aiOutput = document.getElementById('aiOutput');
+        const copyBtn = document.getElementById('copyBtn');
+        const copyBtnText = document.getElementById('copyBtnText');
+        const perfBadge = document.getElementById('perfBadge');
+        const modelLabel = document.getElementById('modelLabel');
+        const timeLabel = document.getElementById('timeLabel');
+        const historyList = document.getElementById('historyList');
+        const dbStatus = document.getElementById('dbStatus');
 
-        checkBtn.addEventListener('click', () => {
+        let rawMarkdownResult = "";
+
+        // Đếm ký tự
+        userInput.addEventListener('input', () => {
+            charCount.innerText = `${userInput.value.length} ký tự`;
+        });
+
+        // Xóa trắng
+        clearBtn.addEventListener('click', () => {
+            userInput.value = '';
+            charCount.innerText = '0 ký tự';
+            resultBox.classList.add('hidden');
+            errorBox.classList.add('hidden');
+            userInput.focus();
+        });
+
+        // Nút câu mẫu thử nhanh
+        document.querySelectorAll('.sample-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                userInput.value = btn.getAttribute('data-text');
+                charCount.innerText = `${userInput.value.length} ký tự`;
+                triggerAnalysis();
+            });
+        });
+
+        // Phím tắt Ctrl + Enter để gửi nhanh
+        userInput.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                triggerAnalysis();
+            }
+        });
+
+        // Sao chép kết quả
+        copyBtn.addEventListener('click', () => {
+            if (!rawMarkdownResult) return;
+            navigator.clipboard.writeText(aiOutput.innerText);
+            copyBtnText.innerText = "Đã sao chép!";
+            setTimeout(() => { copyBtnText.innerText = "Sao chép kết quả"; }, 2000);
+        });
+
+        // Sự kiện bấm nút Phân tích
+        checkBtn.addEventListener('click', triggerAnalysis);
+
+        function triggerAnalysis() {
             const text = userInput.value.trim();
+            const mode = modeSelect.value;
+
             if (!text) {
-                alert('Vui lòng nhập văn bản trước khi phân tích!');
+                alert('Vui lòng nhập văn bản cần kiểm tra!');
+                userInput.focus();
                 return;
             }
 
             loading.classList.remove('hidden');
             resultBox.classList.add('hidden');
+            errorBox.classList.add('hidden');
             checkBtn.disabled = true;
             checkBtn.classList.add('opacity-70', 'cursor-not-allowed');
 
-            // Tạo tên hàm callback ngẫu nhiên để không bị trùng lặp
-            const callbackName = 'jsonpCallback_' + Math.round(100000 * Math.random());
+            const clientStartTime = performance.now();
+            const callbackName = 'jsonpCallback_' + Math.round(1000000 * Math.random());
 
-            // Định nghĩa hàm callback sẽ được gọi khi Apps Script trả kết quả về
+            // Thiết lập bộ đếm thời gian chờ tối đa 25 giây
+            const timeoutId = setTimeout(() => {
+                if (window[callbackName]) {
+                    errorText.innerText = "Yêu cầu phản hồi quá thời gian chờ. Vui lòng thử lại.";
+                    errorBox.classList.remove('hidden');
+                    cleanupJsonp(callbackName, script);
+                }
+            }, 25000);
+
             window[callbackName] = async function(data) {
-                const resultText = data.result || data.error;
-                
-                aiOutput.innerText = resultText;
-                resultBox.classList.remove('hidden');
-                
-                loading.classList.add('hidden');
-                checkBtn.disabled = false;
-                checkBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+                clearTimeout(timeoutId);
+                const totalClientTime = ((performance.now() - clientStartTime) / 1000).toFixed(2);
 
-                try {
-                    const historyRef = ref(db, 'tutor_history');
-                    await push(historyRef, {
-                        original_text: text,
-                        corrected_text: resultText,
-                        timestamp: serverTimestamp()
-                    });
-                } catch (dbError) {
-                    console.error("Lỗi lưu Firebase:", dbError);
+                if (data.error) {
+                    errorText.innerText = data.error;
+                    errorBox.classList.remove('hidden');
+                } else {
+                    rawMarkdownResult = data.result || "";
+                    // Chuyển đổi Markdown sang HTML đẹp mắt
+                    aiOutput.innerHTML = marked.parse(rawMarkdownResult);
+                    resultBox.classList.remove('hidden');
+
+                    // Hiển thị thông số tốc độ & model
+                    perfBadge.classList.remove('hidden');
+                    modelLabel.innerText = data.model || "Gemini Flash";
+                    timeLabel.innerText = `${data.time || totalClientTime}s`;
+
+                    // Lưu lịch sử vào Firebase
+                    try {
+                        const historyRef = ref(db, 'tutor_history');
+                        await push(historyRef, {
+                            original_text: text,
+                            corrected_text: rawMarkdownResult,
+                            mode: mode,
+                            model: data.model || "Gemini Flash",
+                            timestamp: serverTimestamp()
+                        });
+                    } catch (dbErr) {
+                        console.warn("Lưu lịch sử Firebase không thành công:", dbErr.message);
+                    }
                 }
 
-                // Dọn dẹp thẻ script và hàm sau khi chạy xong
-                delete window[callbackName];
-                document.body.removeChild(script);
+                cleanupJsonp(callbackName, script);
             };
 
-            // Tiêm thẻ script động để vượt mặt CORS hoàn toàn
             const script = document.createElement('script');
-            // Cập nhật lại biến GAS_WEB_APP_URL nếu bạn có URL mới sau khi deploy
-            script.src = `${GAS_WEB_APP_URL}?message=${encodeURIComponent(text)}&callback=${callbackName}`;
+            script.src = `${GAS_WEB_APP_URL}?message=${encodeURIComponent(text)}&mode=${encodeURIComponent(mode)}&callback=${callbackName}`;
             
-            // Xử lý trường hợp lỗi mạng
             script.onerror = function() {
-                alert('Có lỗi mạng xảy ra khi kết nối máy chủ.');
-                loading.classList.add('hidden');
-                checkBtn.disabled = false;
-                checkBtn.classList.remove('opacity-70', 'cursor-not-allowed');
-                delete window[callbackName];
-                document.body.removeChild(script);
+                clearTimeout(timeoutId);
+                errorText.innerText = "Không thể kết nối đến máy chủ Google Apps Script. Hãy kiểm tra lại quyền truy cập (Anyone) khi Deploy.";
+                errorBox.classList.remove('hidden');
+                cleanupJsonp(callbackName, script);
             };
 
             document.body.appendChild(script);
-        });
+        }
+
+        function cleanupJsonp(callbackName, scriptElement) {
+            loading.classList.add('hidden');
+            checkBtn.disabled = false;
+            checkBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+            delete window[callbackName];
+            if (scriptElement && scriptElement.parentNode) {
+                scriptElement.parentNode.removeChild(scriptElement);
+            }
+        }
+
+        // 4. Tải 5 lịch sử gần nhất từ Firebase (nếu Rules cho phép đọc hoặc cập nhật trạng thái)
+        try {
+            const recentHistoryQuery = query(ref(db, 'tutor_history'), limitToLast(5));
+            onValue(recentHistoryQuery, (snapshot) => {
+                dbStatus.innerText = "Đã đồng bộ Firebase";
+                dbStatus.className = "text-xs px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 font-medium";
+                
+                if (!snapshot.exists()) return;
+                const items = [];
+                snapshot.forEach(child => { items.unshift(child.val()); });
+                
+                historyList.innerHTML = items.map(item => `
+                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/70 hover:border-blue-300 transition cursor-pointer" onclick="document.getElementById('userInput').value = ${JSON.stringify(item.original_text).replace(/"/g, '&quot;')}">
+                        <div class="font-medium text-slate-800 truncate">${item.original_text}</div>
+                        <div class="text-xs text-slate-400 mt-1">Nhấp để tải lại câu này vào khung soạn thảo</div>
+                    </div>
+                `).join('');
+            }, (err) => {
+                // Nếu bạn để .read: false để bảo mật thì chỉ báo trạng thái Ghi bảo mật
+                dbStatus.innerText = "Chế độ Ghi Bảo Mật (Write-Only)";
+                dbStatus.className = "text-xs px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-medium";
+            });
+        } catch (e) {
+            console.log("Khởi tạo Firebase:", e);
+        }
     </script>
 </body>
 </html>
