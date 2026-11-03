@@ -83,23 +83,23 @@
                 return;
             }
 
-            // Giao diện chờ
             loading.classList.remove('hidden');
             resultBox.classList.add('hidden');
             checkBtn.disabled = true;
             checkBtn.classList.add('opacity-70', 'cursor-not-allowed');
 
             try {
-                // Gọi API tới Apps Script
-                const response = await fetch(GAS_WEB_APP_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ message: text })
+                // SỬA ĐỔI TẠI ĐÂY: Chuyển sang phương thức GET
+                // Mã hóa đoạn văn bản và gắn vào cuối URL
+                const fetchUrl = `${GAS_WEB_APP_URL}?message=${encodeURIComponent(text)}`;
+                
+                const response = await fetch(fetchUrl, {
+                    method: 'GET'
                 });
                 
                 const data = await response.json();
-                const resultText = data.result;
+                const resultText = data.result || data.error;
 
-                // Hiển thị kết quả
                 aiOutput.innerText = resultText;
                 resultBox.classList.remove('hidden');
                 
